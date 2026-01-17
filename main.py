@@ -3,7 +3,7 @@ import numpy as np
 import heapq
 import math
 import os
-
+import matplotlib.pyplot as plt
 
 start = (1, 2, 0)
 goal = (18, 18, 3)
@@ -214,6 +214,27 @@ def generate_trajectory(path_points, speed=1.0, dt=0.05):
 
 
 t, traj, t_points = generate_trajectory(path, speed=1.0, dt=0.05)
+
+
+# 使用 matplotlib 绘制轨迹图片并保存
+fig, axes = plt.subplots(3, 1, figsize=(8, 8), sharex=True)
+axes[0].plot(t, traj[:, 0], linewidth=1.5)
+axes[0].scatter(t_points, path[:, 0], s=25)
+axes[0].set_ylabel("x (m)")
+
+axes[1].plot(t, traj[:, 1], linewidth=1.5)
+axes[1].scatter(t_points, path[:, 1], s=25)
+axes[1].set_ylabel("y (m)")
+
+axes[2].plot(t, traj[:, 2], linewidth=1.5)
+axes[2].scatter(t_points, path[:, 2], s=25)
+axes[2].set_ylabel("z (m)")
+axes[2].set_xlabel("time (s)")
+
+plt.tight_layout()
+plt.savefig(os.path.join("imgs", "p3.png"), dpi=200)
+plt.show()
+
 
 # You must manage this entire project using Git. 
 # When submitting your assignment, upload the project to a code-hosting platform 
