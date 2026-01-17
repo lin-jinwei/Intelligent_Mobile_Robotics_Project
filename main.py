@@ -184,6 +184,36 @@ env.plot_cylinders(
     show=True,
 )
 
+# 规划轨迹的生成函数
+def generate_trajectory(path_points, speed=1.0, dt=0.05):
+    path_points = np.array(path_points, dtype=float)
+    if len(path_points) < 2:
+        raise ValueError("Path must contain at least two points.")
+
+    # Cumulative time at each path point based on distance and speed
+    diffs = np.linalg.norm(np.diff(path_points, axis=0), axis=1)
+    t_points = np.concatenate(([0.0], np.cumsum(diffs / speed)))
+
+    samples_t = []
+    samples_xyz = []
+    for i in range(len(path_points) - 1):
+        p1 = path_points[i]
+        p2 = path_points[i + 1]
+        seg_time = max(t_points[i + 1] - t_points[i], dt)
+        n_samples = max(int(math.ceil(seg_time / dt)), 2)
+        for j in range(n_samples):
+            tau = j / (n_samples - 1)
+            s = 3 * tau * tau - 2 * tau * tau * tau  # smooth step (zero vel at ends)
+            point = p1 + s * (p2 - p1)
+            samples_xyz.append(point)
+            samples_t.append(t_points[i] + tau * seg_time)
+
+    traj = np.array(samples_xyz, dtype=float)
+    t = np.array(samples_t, dtype=float)
+    return t, traj, t_points
+
+
+t, traj, t_points = generate_trajectory(path, speed=1.0, dt=0.05)
 
 # You must manage this entire project using Git. 
 # When submitting your assignment, upload the project to a code-hosting platform 
