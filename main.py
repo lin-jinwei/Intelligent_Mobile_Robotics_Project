@@ -165,6 +165,8 @@ def plan_path(start_point, goal_point, resolution=0.5):
 # --------------------------------------------------------------------------------------------------- #
 
 
+path = plan_path(start, goal, resolution=0.5)
+
 
 # You must manage this entire project using Git. 
 # When submitting your assignment, upload the project to a code-hosting platform 
