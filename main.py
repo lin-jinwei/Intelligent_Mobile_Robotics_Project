@@ -1,8 +1,13 @@
 from flight_environment import FlightEnvironment
+import numpy as np
+import heapq
+import math
+import os
 
-env = FlightEnvironment(50)
-start = (1,2,0)
-goal = (18,18,3)
+
+start = (1, 2, 0)
+goal = (18, 18, 3)
+env = FlightEnvironment(50, protected_points=[start, goal])
 
 # --------------------------------------------------------------------------------------------------- #
 # Call your path planning algorithm here. 
