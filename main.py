@@ -21,7 +21,8 @@ env = FlightEnvironment(50, protected_points=[start, goal])
 # --------------------------------------------------------------------------------------------------- #
 
 
-
+def _is_free(point):
+    return (not env.is_outside(point)) and (not env.is_collide(point))
 
 
 
