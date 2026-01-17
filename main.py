@@ -164,8 +164,25 @@ def plan_path(start_point, goal_point, resolution=0.5):
 
 # --------------------------------------------------------------------------------------------------- #
 
-
+# 定义起点、终点
 path = plan_path(start, goal, resolution=0.5)
+
+# 保存图片
+os.makedirs("imgs", exist_ok=True)
+env.plot_cylinders(
+    path=None,
+    start=start,
+    goal=goal,
+    save_path=os.path.join("imgs", "p1.png"),
+    show=False,
+)
+env.plot_cylinders(
+    path,
+    start=start,
+    goal=goal,
+    save_path=os.path.join("imgs", "p2.png"),
+    show=True,
+)
 
 
 # You must manage this entire project using Git. 
