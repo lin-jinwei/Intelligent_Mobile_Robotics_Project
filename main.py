@@ -39,6 +39,21 @@ def _segment_is_free(p1, p2, step=0.2):
     return True
 
 
+def _nearest_free_index(idx, max_radius, dims):
+    x_max, y_max, z_max = dims
+    ix, iy, iz = idx
+    for r in range(max_radius + 1):
+        for dx in range(-r, r + 1):
+            for dy in range(-r, r + 1):
+                for dz in range(-r, r + 1):
+                    nx, ny, nz = ix + dx, iy + dy, iz + dz
+                    if nx < 0 or ny < 0 or nz < 0:
+                        continue
+                    if nx > x_max or ny > y_max or nz > z_max:
+                        continue
+                    yield (nx, ny, nz)
+
+
 
 # --------------------------------------------------------------------------------------------------- #
 #   Call your trajectory planning algorithm here. The algorithm should
