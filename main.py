@@ -69,6 +69,97 @@ def _nearest_free_index(idx, max_radius, dims):
 #   follows these path points.
 
 
+def plan_path(start_point, goal_point, resolution=0.5):
+    width, length, height = env.env_width, env.env_length, env.env_height
+    max_ix = int(round(width / resolution))
+    max_iy = int(round(length / resolution))
+    max_iz = int(round(height / resolution))
+
+    def to_index(p):
+        return (
+            int(round(p[0] / resolution)),
+            int(round(p[1] / resolution)),
+            int(round(p[2] / resolution)),
+        )
+
+    def to_point(idx):
+        return np.array(
+            [idx[0] * resolution, idx[1] * resolution, idx[2] * resolution],
+            dtype=float,
+        )
+
+    start_idx = to_index(start_point)
+    goal_idx = to_index(goal_point)
+
+    # Snap to nearest free grid nodes if needed
+    dims = (max_ix, max_iy, max_iz)
+    for candidate in _nearest_free_index(start_idx, 3, dims):
+        if _is_free(to_point(candidate)):
+            start_idx = candidate
+            break
+    for candidate in _nearest_free_index(goal_idx, 3, dims):
+        if _is_free(to_point(candidate)):
+            goal_idx = candidate
+            break
+
+    neighbors = []
+    for dx in (-1, 0, 1):
+        for dy in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                if dx == 0 and dy == 0 and dz == 0:
+                    continue
+                neighbors.append((dx, dy, dz))
+
+    open_set = []
+    heapq.heappush(open_set, (0.0, start_idx))
+    came_from = {}
+    g_score = {start_idx: 0.0}
+
+    def heuristic(a, b):
+        pa = to_point(a)
+        pb = to_point(b)
+        return float(np.linalg.norm(pa - pb))
+
+    visited = set()
+    while open_set:
+        _, current = heapq.heappop(open_set)
+        if current in visited:
+            continue
+        visited.add(current)
+        if current == goal_idx:
+            break
+        for dx, dy, dz in neighbors:
+            nx, ny, nz = current[0] + dx, current[1] + dy, current[2] + dz
+            if nx < 0 or ny < 0 or nz < 0:
+                continue
+            if nx > max_ix or ny > max_iy or nz > max_iz:
+                continue
+            neighbor = (nx, ny, nz)
+            if neighbor in visited:
+                continue
+            p_current = to_point(current)
+            p_neighbor = to_point(neighbor)
+            if not _is_free(p_neighbor):
+                continue
+            if not _segment_is_free(p_current, p_neighbor):
+                continue
+            tentative = g_score[current] + np.linalg.norm(p_neighbor - p_current)
+            if tentative < g_score.get(neighbor, float("inf")):
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative
+                f_score = tentative + heuristic(neighbor, goal_idx)
+                heapq.heappush(open_set, (f_score, neighbor))
+
+    if goal_idx not in came_from and goal_idx != start_idx:
+        raise RuntimeError("Path planning failed. Try adjusting resolution or start/goal.")
+
+    # Reconstruct path
+    path_indices = [goal_idx]
+    while path_indices[-1] != start_idx:
+        path_indices.append(came_from[path_indices[-1]])
+    path_indices.reverse()
+    return np.array([to_point(idx) for idx in path_indices], dtype=float)
+
 
 
 # --------------------------------------------------------------------------------------------------- #
