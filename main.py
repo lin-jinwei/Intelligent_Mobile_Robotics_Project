@@ -24,6 +24,19 @@ env = FlightEnvironment(50, protected_points=[start, goal])
 def _is_free(point):
     return (not env.is_outside(point)) and (not env.is_collide(point))
 
+def _segment_is_free(p1, p2, step=0.2):
+    p1 = np.array(p1, dtype=float)
+    p2 = np.array(p2, dtype=float)
+    dist = np.linalg.norm(p2 - p1)
+    if dist == 0:
+        return _is_free(p1)
+    n = int(math.ceil(dist / step))
+    for i in range(n + 1):
+        alpha = i / n
+        p = (1 - alpha) * p1 + alpha * p2
+        if not _is_free(p):
+            return False
+    return True
 
 
 
